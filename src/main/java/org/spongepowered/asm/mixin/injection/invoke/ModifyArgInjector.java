@@ -27,13 +27,13 @@ package org.spongepowered.asm.mixin.injection.invoke;
 import java.util.Arrays;
 import java.util.List;
 
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.spongepowered.asm.mixin.injection.InjectionPoint;
 import org.spongepowered.asm.mixin.injection.InjectionPoint.RestrictTargetLevel;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.invoke.util.InvokeUtil;
 import org.spongepowered.asm.mixin.injection.struct.InjectionInfo;
 import org.spongepowered.asm.mixin.injection.struct.InjectionNodes.InjectionNode;
 import org.spongepowered.asm.mixin.injection.struct.Target;
@@ -110,12 +110,8 @@ public class ModifyArgInjector extends InvokeInjector {
     @Override
     protected void injectAtInvoke(Target target, InjectionNode node) {
         MethodInsnNode methodNode = (MethodInsnNode)node.getCurrentTarget();
-        Type[] originalArgs = Type.getArgumentTypes(((MethodInsnNode) node.getOriginalTarget()).desc);
-        Type[] currentArgs = Type.getArgumentTypes(methodNode.desc);
-        if (node.isReplaced() && node.hasDecoration(RedirectInjector.Meta.KEY) && methodNode.getOpcode() != Opcodes.INVOKESTATIC) {
-            // A redirect handler method for a virtual target will have an extra arg at the start that we don't care about.
-            currentArgs = Arrays.copyOfRange(currentArgs, 1, currentArgs.length);
-        }
+        Type[] originalArgs = InvokeUtil.getOriginalArgs(node);
+        Type[] currentArgs = InvokeUtil.getCurrentArgs(node);
         int argIndex = this.findArgIndex(target, originalArgs);
         InsnList insns = new InsnList();
         Extension extraLocals = target.extendLocals();
