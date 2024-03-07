@@ -38,10 +38,11 @@ public class InvokeUtil {
     }
 
     public static Type[] getCurrentArgs(InjectionNode node) {
-        MethodInsnNode methodNode = (MethodInsnNode) node.getCurrentTarget();
-        Type[] currentArgs = Type.getArgumentTypes(methodNode.desc);
-        if (node.isReplaced() && node.hasDecoration(RedirectInjector.Meta.KEY) && methodNode.getOpcode() != Opcodes.INVOKESTATIC) {
-            // A non-static redirect handler method will have an extra arg at the start that we don't care about.
+        MethodInsnNode original = (MethodInsnNode) node.getOriginalTarget();
+        MethodInsnNode current = (MethodInsnNode) node.getCurrentTarget();
+        Type[] currentArgs = Type.getArgumentTypes(current.desc);
+        if (node.isReplaced() && node.hasDecoration(RedirectInjector.Meta.KEY) && original.getOpcode() != Opcodes.INVOKESTATIC) {
+            // A redirect on a non-static target method will have an extra arg at the start that we don't care about.
             return Arrays.copyOfRange(currentArgs, 1, currentArgs.length);
         }
         return currentArgs;
