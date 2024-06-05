@@ -123,7 +123,12 @@ public class ModifyArgInjector extends InvokeInjector {
         }
         
         target.insns.insertBefore(methodNode, insns);
-        target.extendStack().set(2 - (extraLocals.get() - 1)).apply();
+        Extension extraStack = target.extendStack();
+        if (!isStatic) {
+            extraStack.add();
+        }
+        extraStack.add(methodArgs);
+        extraStack.apply();
         extraLocals.apply();
     }
 
